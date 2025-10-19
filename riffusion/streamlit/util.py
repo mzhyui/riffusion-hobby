@@ -192,7 +192,7 @@ def spectrogram_image_converter(
     return SpectrogramImageConverter(params=params, device=device)
 
 
-@st.cache
+@st.cache_resource
 def spectrogram_image_from_audio(
     segment: pydub.AudioSegment,
     params: SpectrogramParams,
@@ -314,7 +314,7 @@ def load_magic_mix_pipeline(
     return pipeline
 
 
-@st.cache
+@st.cache_resource
 def run_img2img_magic_mix(
     prompt: str,
     init_image: Image.Image,
@@ -350,7 +350,7 @@ def run_img2img_magic_mix(
         )
 
 
-@st.cache
+@st.cache_resource
 def run_img2img(
     prompt: str,
     init_image: Image.Image,
