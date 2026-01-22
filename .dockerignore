@@ -1,0 +1,6 @@
+.venv
+.github
+.git
+.codemap
+Dockerfile
+docker-compose.yml

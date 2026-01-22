@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Riffusion API Server
+  riffusion-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: riffusion:latest
+    container_name: riffusion-server
+    ports:
+      - "3013:3013"
+    volumes:
+      # Mount host's HuggingFace cache directory to container
+      # This allows the container to use pre-downloaded models
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+      # Optional: Mount local code for development
+      # - .:/app
+    environment:
+      # Set device to use (cpu, cuda, or mps)
+      - RIFFUSION_DEVICE=cuda
+      # Optional: Specify HuggingFace model checkpoint
+      # - RIFFUSION_CHECKPOINT=riffusion/riffusion-model-v1
+    command: python -m riffusion.server --host 0.0.0.0 --port 3013
+    # For GPU support, uncomment the following lines
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # Riffusion Streamlit Playground (optional)
+  riffusion-playground:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: riffusion:latest
+    container_name: riffusion-playground
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount host's HuggingFace cache directory
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+      # Optional: Mount local code for development
+      # - .:/app
+    environment:
+      - RIFFUSION_DEVICE=cuda
+    command: python -m riffusion.streamlit.playground --server.address 0.0.0.0
+    # For GPU support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+# For CPU-only setup, create a docker-compose.override.yml file with:
+# version: '3.8'
+# services:
+#   riffusion-server:
+#     environment:
+#       - RIFFUSION_DEVICE=cpu
+#     deploy: {}
+#   riffusion-playground:
+#     environment:
+#       - RIFFUSION_DEVICE=cpu
+#     deploy: {}
